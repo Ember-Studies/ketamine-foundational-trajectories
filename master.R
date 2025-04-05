@@ -7,11 +7,17 @@ require(janitor)
 require(lubridate)
 require(survival)
 require(datadictionary)
+require(tidystringdist)
+require(rairtable)
 
 # set paths
 path_code <- '/path/to/code/' # path to formatting scripts
 path_data <- '/path/to/data/' # path to csv files
-path_out <- '/path/to/output/' # path to save output
+path_out <- '/path/for/output/' # path to save output
+
+# set airtable access token
+token <- readLines('/path/to/token.txt') # read txt file that contains token
+set_airtable_api_key(token, install = FALSE)
 
 # source functions
 source(paste0(path_code, 'format_patient_airtable.R'))

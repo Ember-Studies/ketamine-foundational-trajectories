@@ -10,8 +10,8 @@ cleanup <- function(ember_data){
                   -date_submited_tx, -fx_historical_psychiatrist)
   
   # rename variables
-  ember_data <- ember_data %>%
-    dplyr::rename('number_of_foundational_infusions_including_today'='x_foundational_infusions_including_today')
+  #ember_data <- ember_data %>%
+    #dplyr::rename('number_of_foundational_infusions_including_today'='number_foundational_infusions_including_today')
   
   
   # function to handle strings with missings

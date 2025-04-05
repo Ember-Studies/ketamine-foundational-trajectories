@@ -2,8 +2,12 @@ format_dose <- function(path_data){
 
   require(readxl)
   
-  # load dose data
-  dose_data <- read.csv(paste0(path_data, 'Visits-All Data.csv'))
+  # load the visits table
+  tablename <- 'Visits'
+  
+  # establish connection and read table
+  testtable_dose <- airtable(tablename, 'appRioSAcdOonQ8RX')
+  dose_data <- read_airtable(testtable_dose, id_to_col = TRUE)
   
   # clean names
   dose_data <- dose_data %>%
