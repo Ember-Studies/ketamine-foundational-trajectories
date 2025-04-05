@@ -4,7 +4,7 @@ format_patient_airtable <- function(path_data, accstoken){
   tablename <- 'Patients'  # available tables are Patients, Providers, Visits and Events
   
   # establish connection and read table
-  testtable <- airtable(tablename, 'appRioSAcdOonQ8RX')
+  testtable <- airtable(tablename, 'appXXXXXXXX')
   airtable_data <- read_airtable(testtable, id_to_col = TRUE)
   
   # clean names
