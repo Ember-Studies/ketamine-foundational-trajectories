@@ -6,7 +6,7 @@ format_dose <- function(path_data){
   tablename <- 'Visits'
   
   # establish connection and read table
-  testtable_dose <- airtable(tablename, 'appXXXXXXXX')
+  testtable_dose <- airtable(tablename, 'appRioSAcdOonQ8RX')
   dose_data <- read_airtable(testtable_dose, id_to_col = TRUE)
   
   # clean names

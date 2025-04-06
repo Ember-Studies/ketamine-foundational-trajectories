@@ -9,6 +9,7 @@ require(survival)
 require(datadictionary)
 require(tidystringdist)
 require(rairtable)
+require(writexl)
 
 # set paths
 path_code <- '/path/to/code/' # path to formatting scripts
@@ -30,7 +31,7 @@ source(paste0(path_code, 'cleanup.R'))
 source(paste0(path_code, 'data_dictionary.R'))
 
 # Format base patient table
-airtable_data_filtered <- format_patient_airtable(path_data = path_data)
+airtable_data_filtered <- format_patient_airtable(path_data = path_data, date_ceiling_ymd = "2025-01-01")
 
 # Format intake table
 intake_data_filtered <- format_intake_tables(path_data = path_data)
@@ -64,7 +65,7 @@ data_dictionary(ember_data = ember_data,
 
 # Save
 save(ember_data, file = sprintf('%s/ember_data_formatted_%s.Rdata', path_out, gsub(" ", "_", date())))
-
+write_xlsx(ember_data, sprintf('%s/ember_data_formatted_%s.xlsx', path_out, gsub(" ", "_", date())))
 
 
 

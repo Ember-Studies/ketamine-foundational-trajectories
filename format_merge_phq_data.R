@@ -29,19 +29,13 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   # transform date submitted
   phq$date_submited_tx <- lubridate::ymd(phq$date_submited)
   
-  # get patient age and identify likely typo dobs
-  phq$age_est <- lubridate::interval(phq$date_of_birth_tx, phq$date_submited_tx) / years(x=1)
+  # transform first opened date
+  phq$first_opened_tx <- as.Date(lubridate::mdy_hms(phq$first_opened))
   
-  # gather IDs of young patients that may be typos: fixed arbitrarily to <= 18 and >=99
-  ages_to_correct_unique <- c(unique(phq$client_id[which(phq$age_est <= 18)]),
-                              unique(phq$client_id[which(phq$age_est >= 99)])) 
-  
-  # gather IDs of patients with missing ages in PHQ
-  ages_to_correct_missing <- unique(phq$client_id[which(is.na(phq$age_est))])
-  
-  # combine
-  ages_to_correct <- unique(c(ages_to_correct_unique, ages_to_correct_missing))
-  ages_to_correct <- ages_to_correct[!is.na(ages_to_correct)]
+  # make phq_9_date variable from first opened and secondarily date submitted
+  phq$phq9_date <- phq$first_opened_tx
+  index_phq9_date_missing <- which(is.na(phq$phq9_date))
+  phq$phq9_date[index_phq9_date_missing] <- phq$date_submited_tx[index_phq9_date_missing]
   
   # read in all clients csv for corrected dobs
   data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
@@ -59,23 +53,35 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   data_all_clients$date_of_birt_tx <- lubridate::mdy(data_all_clients$date_of_birt_tx)
   
   # replace phq dob with all clients dob
-  for(s in ages_to_correct){
-    phq[which(phq$client_id==s), 'date_of_birth_tx'] <- data_all_clients$date_of_birt_tx[which(data_all_clients$client_id==s)]
+  for(s in 1:nrow(data_all_clients)){
+    
+    # get current client_id
+    sid <- data_all_clients$client_id[s]
+    
+    # set dob replacement from all clients sheet
+    dob_replace <- data_all_clients$date_of_birt_tx[which(data_all_clients$client_id==sid)]
+    
+    # leave as is if dob not recorded in all clients
+    if(is.na(dob_replace)){
+      next
+    }else{
+      phq[which(phq$client_id==sid), 'date_of_birth_tx'] <- dob_replace
+    }
   }
   
   # format PHQ data
   phq_formatted <- phq %>%
-    mutate(date_submitted_transformed=ymd(date_submited),
+    mutate(date_submitted_transformed=phq9_date,
            date_of_birth_transformed=ymd(date_of_birth_tx)) %>%
-    dplyr::select(-archived, -source, -first_opened, -date_submited, -date_of_birth, -have_these_problems_made_it_difficult_for_you_to_do_your_work_take_care_of_things_at_home_or_get_along_with_other_people, -age_est, -date_of_birth_tx, -x_optional_in_your_own_words_how_would_you_describe_how_you_are_feeling_and_what_is_contributing_to_your_current_mood) %>%
+    dplyr::select(-archived, -source, -first_opened, -date_submited, -phq9_date, -date_of_birth, -date_of_birth_tx, -x_optional_in_your_own_words_how_would_you_describe_how_you_are_feeling_and_what_is_contributing_to_your_current_mood) %>%
+    rename('phq9_functionality'='have_these_problems_made_it_difficult_for_you_to_do_your_work_take_care_of_things_at_home_or_get_along_with_other_people') %>%
     arrange(client_id, date_submitted_transformed) %>%
     group_by(client_id) %>%
     mutate(time_point=row_number()) %>% 
     mutate(time_interval = date_submitted_transformed - date_submitted_transformed[1]) %>%
     mutate(time_since_previous = date_submitted_transformed - lag(date_submitted_transformed, n = 1, default = first (date_submitted_transformed))) %>%
-    mutate(age_years = lubridate::interval(date_of_birth_transformed, date_submitted_transformed) / years(x=1))
-  
-  phq_formatted <- data.frame(phq_formatted)
+    mutate(age_years = lubridate::interval(date_of_birth_transformed, date_submitted_transformed) / years(x=1)) %>%
+    as.data.frame()
   
   # sanity check phq range
   # phq_formatted[which(phq_formatted$phq_tot>27), ]
@@ -86,8 +92,7 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   
   # rename variables in merged dataframe and drop date of birth
   merged_patient_airtable_intake_data <- merged_patient_airtable_intake_data %>%
-    rename('date_submitted_intake'='date_submitted') %>%
-    dplyr::select(-date_of_birth)
+    rename('date_submitted_intake'='date_submitted')
   
   # merge with left join
   merged_phq_patient_data <- phq_formatted %>%

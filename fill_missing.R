@@ -91,6 +91,14 @@ fill_missing <- function(ember_data, variable, path_data){
     
   }
   
+  # all clients form
+  data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
+  data_all_clients <- data_all_clients %>%
+    clean_names() %>%
+    rename('sex_assigned_at_birth'='sex')
+  
+  df_mapping <- search_missings(data = data_all_clients, df_mapping = df_mapping, variable = variable)
+  
   # all intake data form
   data_all_intake <- read.csv(paste0(path_data, 'MGH - All Intake Data - Combined.csv'))
   data_all_intake <- data_all_intake %>%
@@ -111,14 +119,6 @@ fill_missing <- function(ember_data, variable, path_data){
     clean_names()
   
   df_mapping <- search_missings(data = data_all_appointments, df_mapping = df_mapping, variable = variable)
-  
-  # all clients form
-  data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
-  data_all_clients <- data_all_clients %>%
-    clean_names() %>%
-    rename('sex_assigned_at_birth'='sex')
-  
-  df_mapping <- search_missings(data = data_all_clients, df_mapping = df_mapping, variable = variable)
   
   # brief intake form
   data_brief_intake <- read.csv(paste0(path_data, 'MGH - Form - Brief Medical Intake Form - 2025Data.csv'))

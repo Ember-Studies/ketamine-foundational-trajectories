@@ -14,6 +14,8 @@ data_dictionary <- function(ember_data, path_out){
     phq8='PHQ item 8',
     phq9='PHQ item 9',
     phq_tot='PHQ total score',
+    phq9_functionality='From question: have_these_problems_made_it_difficult_for_you_to_do_your_work_take_care_of_things_at_home_or_get_along_with_other_people',
+    first_opened_tx = 'Date PHQ first opened. Used to create phq9_date',
     date_submitted_phq='Date of PHQ submission',
     date_of_birth_transformed='DOB',
     time_point= 'Time point linked to PHQ submission order with T1 as PHQ as highest PHQ score prior to or on day of first infusion',
@@ -21,10 +23,10 @@ data_dictionary <- function(ember_data, path_out){
     time_since_previous = 'Time since last PHQ submission (days)',
     age_years = 'Age (years) as date of birth to current PHQ',
     first_infusion_completed = 'Date of first infusion',
+    number_foundational_infusions_including_today = 'Number of foundational infusions up to and not including current PHQ submission',
     foundation_ember_recommended = 'Ember suggested treatment course',
     foundation_completion_status = 'Status of suggested treatment course',
     last_foundational_infusion = 'Date of last foundational infusion',
-    number_of_foundational_infusions_including_today = 'number of completed foundational infusions including current date',
     foundation_outcome = 'Ember-defined clinical outcome',
     fx_therapistbinary = 'Unknown',
     primary_office = 'Primary office/clinic',
@@ -62,12 +64,11 @@ data_dictionary <- function(ember_data, path_out){
     comorbid_ptsd = 'Comorbid post-traumatic stress disorder disorder (1=Yes/0=No)',
     comorbid_sud = 'Comorbid substance use disorder (1=Yes/0=No)',
     comorbid_aud = 'Comorbid alcohol use disorder (1=Yes/0=No)',
-    comorbid_bipolar = 'Bipolar disorder diagnosis (1=Yes/0=No)',
-    comorbid_depression_mdd = 'Major depressive disorder diagnosis (1=Yes/0=No)',
-    comorbid_depression_other = 'Other depression diagnosis (1=Yes/0=No)',
+    primary_dx_bipolar = 'Bipolar disorder diagnosis (1=Yes/0=No)',
+    primary_dx_depression_mdd = 'Major depressive disorder diagnosis (1=Yes/0=No)',
+    primary_dx_depression_other = 'Other depression diagnosis (1=Yes/0=No)',
     comorbid_other_condition = 'Diagnosis of another psychiatric condition (1=Yes/0=No)',
-    age_category_children = 'Age < 15 years',
-    age_category_youth = 'Age >= 15 and < 25 years',
+    age_category_adolescent = 'Age < 18 years',
     age_category_adult = 'Age >= 25 and < 65 years',
     age_category_senior = 'Age >= 65 years',
     age_bin = 'Binned age category',
@@ -161,6 +162,7 @@ data_dictionary <- function(ember_data, path_out){
   
   # check all variables are labeled
   names(ember_data)[!names(ember_data) %in% names(ember_labels)]
+  names(ember_labels)[!names(ember_labels) %in% names(ember_data)]
   
   # create data dictionary
   dic <- create_dictionary(ember_data, var_labels = ember_labels)
