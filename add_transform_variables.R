@@ -31,8 +31,8 @@ add_transform_variables <- function(merged_phq_patient_data, max_prior_infusion_
   
   ## Dose
   # get dose data
-  source(paste0(path_code, 'format_dose.R', plot_hist = plot_hist))
-  dose_data <- format_dose(path_data = path_data)
+  source(paste0(path_code, 'format_dose.R'))
+  dose_data <- format_dose(path_data = path_data, plot_hist = plot_hist)
   
   # add dose data to main data frame
   source(paste0(path_code, 'add_dose.R'))
