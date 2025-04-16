@@ -1,4 +1,4 @@
-add_dose <- function(merged_phq_patient_data, dose_data){
+add_dose <- function(merged_phq_patient_data, dose_data, max_prior_infusion_threshold){
 
   # split data by subject id
   data_split <- split(merged_phq_patient_data, f = merged_phq_patient_data$client_id)
@@ -132,6 +132,9 @@ add_dose <- function(merged_phq_patient_data, dose_data){
   
   # check
   #data_out[data_out$client_id==sample(unique(data_out$client_id), 1),]
+  
+  # filter records with number of infusions before PHQ above threshold
+  data_out <- data_out[data_out$infusions_before_phq <= max_prior_infusion_threshold, ]
   
   return(data_out)
 
