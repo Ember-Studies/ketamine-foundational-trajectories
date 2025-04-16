@@ -1,7 +1,7 @@
 # Time pre: days before/including first infusion (should be passed as negative value)
 # Time post: days after last infusion
 
-format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data, time_pre, time_post){
+format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data, time_pre, time_post, plot_hist = FALSE){
   
   # read PHQ data 
   phq <- read.csv(paste0(path_data, 'MGH - All PHQ9 Data - 2025Data.csv'))
@@ -100,7 +100,9 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   
   # create Field 1: Date PHQ-9 submitted minus Date Of First infusion: "time_first_infusion_to_phq"
   merged_phq_patient_data$time_first_infusion_to_phq <- merged_phq_patient_data$date_submitted_phq - merged_phq_patient_data$first_infusion_completed # coded so negative is PHQ before infusion
-  hist(as.numeric(merged_phq_patient_data$time_first_infusion_to_phq))
+  if (plot_hist) {
+    hist(as.numeric(merged_phq_patient_data$time_first_infusion_to_phq))
+  }
   
   # drop/remove all records where Field1 < -30 days 
   merged_phq_patient_data <- merged_phq_patient_data[!is.na(merged_phq_patient_data$time_first_infusion_to_phq), ]

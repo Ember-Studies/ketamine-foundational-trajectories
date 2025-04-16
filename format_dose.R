@@ -1,4 +1,4 @@
-format_dose <- function(path_data){
+format_dose <- function(path_data, plot_hist=FALSE){
 
   require(readxl)
   
@@ -120,12 +120,16 @@ format_dose <- function(path_data){
   
   dose <- as.numeric(ss)
   
-  hist(dose)
+  if (plot_hist) {
+    hist(dose)
+  }
   
   # reassign formatted dose
   infusion_notes_merged$ketamine_dose_mg <- dose
   
-  hist(infusion_notes_merged$ketamine_dose_mg / infusion_notes_merged$patient_weight_kg)
+  if (plot_hist) {
+    hist(infusion_notes_merged$ketamine_dose_mg / infusion_notes_merged$patient_weight_kg)
+  }
   summary(infusion_notes_merged$ketamine_dose_mg / infusion_notes_merged$patient_weight_kg)
   
   # format dose data prior to mid-2021
