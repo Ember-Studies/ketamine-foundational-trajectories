@@ -5,7 +5,7 @@
 # - medication indicator variables
 # - medication class loads
 
-add_transform_variables <- function(merged_phq_patient_data, path_data, path_code){
+add_transform_variables <- function(merged_phq_patient_data, path_data, path_code, plot_hist = FALSE){
   
   ## Parse comorbidities
   merged_phq_patient_data$comorbid_anxiety <- grepl('Anxiety', merged_phq_patient_data$do_you_have_any_of_the_following_mental_health_conditions_check_all_that_apply)*1
@@ -30,7 +30,7 @@ add_transform_variables <- function(merged_phq_patient_data, path_data, path_cod
   
   ## Dose
   # get dose data
-  source(paste0(path_code, 'format_dose.R'))
+  source(paste0(path_code, 'format_dose.R', plot_hist = plot_hist))
   dose_data <- format_dose(path_data = path_data)
   
   # add dose data to main data frame
