@@ -27,6 +27,7 @@ data_dictionary <- function(ember_data, path_out){
     foundation_ember_recommended = 'Ember suggested treatment course',
     foundation_completion_status = 'Status of suggested treatment course',
     last_foundational_infusion = 'Date of last foundational infusion',
+    first_ltc_infusion_date = 'Date of first long-term care infusion',
     foundation_outcome = 'Ember-defined clinical outcome',
     fx_therapistbinary = 'Unknown',
     primary_office = 'Primary office/clinic',
