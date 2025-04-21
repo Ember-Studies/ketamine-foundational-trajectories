@@ -63,12 +63,8 @@ data_dictionary <- function(ember_data, path_out){
     comorbid_anxiety = 'Comorbid anxiety (1=Yes/0=No)',
     comorbid_ocd = 'Comorbid obsessive-compulsive disorder (1=Yes/0=No)',
     comorbid_ptsd = 'Comorbid post-traumatic stress disorder disorder (1=Yes/0=No)',
-    comorbid_sud = 'Comorbid substance use disorder (1=Yes/0=No)',
-    comorbid_aud = 'Comorbid alcohol use disorder (1=Yes/0=No)',
-    primary_dx_bipolar = 'Bipolar disorder diagnosis (1=Yes/0=No)',
-    primary_dx_depression_mdd = 'Major depressive disorder diagnosis (1=Yes/0=No)',
-    primary_dx_depression_other = 'Other depression diagnosis (1=Yes/0=No)',
-    comorbid_other_condition = 'Diagnosis of another psychiatric condition (1=Yes/0=No)',
+    comorbid_sud = 'Comorbid substance use or alcohol use disorder (1=Yes/0=No)',
+    primary_diagnosis_bipolar = '1=Bipolar Disorder, 0=Major Depressive Disorder',
     age_category_adolescent = 'Age < 18 years',
     age_category_adult = 'Age >= 25 and < 65 years',
     age_category_senior = 'Age >= 65 years',
@@ -158,7 +154,8 @@ data_dictionary <- function(ember_data, path_out){
     mood_stabilizer_load = 'Count of number of mood stabilizers currently used',
     non_benzodiazepine_anxiolytic_sedative_load = 'Count of number of non-benzodiazepine anxiolytic sedatives currently used',
     stimulant_load = 'Count of number of stimulants currently used',
-    total_medication_load = 'Count of number of all medications currently used (sum across previous classes)'
+    total_medication_load = 'Count of number of all medications currently used (sum across previous classes)',
+    per_protocol = 'Per-protocol patients (1=PP/0=ITT conditioned on inclusion of "Yes-Full Foundation" argument): Those with foundation_ember_recommended = "Yes - Full Foundation, date(last_foundational_infusion) - date(first_infusion_completed)) <=14 days, and number_foundational_infusions_including_today <= 4'
   )
   
   # check all variables are labeled

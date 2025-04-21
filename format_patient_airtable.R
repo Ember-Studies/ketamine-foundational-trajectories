@@ -1,4 +1,4 @@
-format_patient_airtable <- function(path_data, accstoken, date_ceiling_ymd){
+format_patient_airtable <- function(path_data, accstoken, date_ceiling_ymd, filter_full_foundation=TRUE){
   
   # load the patient table
   tablename <- 'Patients'  # available tables are Patients, Providers, Visits and Events
@@ -33,7 +33,10 @@ format_patient_airtable <- function(path_data, accstoken, date_ceiling_ymd){
   # airtable_data_filtered <- airtable_data_filtered[airtable_data_filtered$first_infusion_completed != "", ]
   
   # Field “Foundation: Ember Recommended” = “Yes - Full Foundation”
-  airtable_data_filtered <- airtable_data_filtered[airtable_data_filtered$foundation_ember_recommended == "Yes - Full Foundation", ]
+  if (filter_full_foundation){
+    airtable_data_filtered <- airtable_data_filtered %>%
+      dplyr::filter(foundation_ember_recommended == "Yes - Full Foundation")
+  }
   
   return(airtable_data_filtered)
   

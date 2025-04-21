@@ -92,10 +92,10 @@ fill_missing <- function(ember_data, variable, path_data){
   }
   
   # all clients form
-  data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
+  #data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
+  data_all_clients <- readxl::read_xlsx(paste0(path_data, 'MGH - List - All Clients.xlsx'), sheet = '2025Data')
   data_all_clients <- data_all_clients %>%
-    clean_names() %>%
-    rename('sex_assigned_at_birth'='sex')
+    clean_names()
   
   df_mapping <- search_missings(data = data_all_clients, df_mapping = df_mapping, variable = variable)
   
