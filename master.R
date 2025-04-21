@@ -13,13 +13,9 @@ require(readxl)
 require(writexl)
 
 # set paths
-# path_code <- '/path/to/code/' # path to formatting scripts
-# path_data <- '/path/to/data/' # path to csv files
-# path_out <- '/path/for/output/' # path to save output
-
-path_code <- '~/Google Drive/My Drive/MGH/Studies/Ember/code/shared/ember/code/' # path to formatting scripts
-path_data <- '~/Google Drive/My Drive/MGH/Studies/Ember/data/EHR/Raw_March_13_2025/' # path to csv files
-path_out <- '~/Desktop/' # path to save output
+path_code <- '/path/to/code/' # path to formatting scripts
+path_data <- '/path/to/data/' # path to csv files
+path_out <- '/path/for/output/' # path to save output
 
 # set airtable access token
 token <- readLines('~/Google Drive/My Drive/MGH/Studies/Ember/code/Tejas_Code/token.txt') # read txt file that contains token
