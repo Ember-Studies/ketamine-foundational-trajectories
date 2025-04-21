@@ -18,7 +18,7 @@ path_data <- '/path/to/data/' # path to csv files
 path_out <- '/path/for/output/' # path to save output
 
 # set airtable access token
-token <- readLines('~/Google Drive/My Drive/MGH/Studies/Ember/code/Tejas_Code/token.txt') # read txt file that contains token
+token <- readLines('/path/to/token.txt') # read txt file that contains token
 set_airtable_api_key(token, install = FALSE)
 
 # source functions
