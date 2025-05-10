@@ -154,7 +154,9 @@ data_dictionary <- function(ember_data, path_out){
     mood_stabilizer_load = 'Count of number of mood stabilizers currently used',
     non_benzodiazepine_anxiolytic_sedative_load = 'Count of number of non-benzodiazepine anxiolytic sedatives currently used',
     stimulant_load = 'Count of number of stimulants currently used',
+    other_psychotropic_medication_load = 'Count of number of other psychotropic medications not in other categories',
     total_medication_load = 'Count of number of all medications currently used (sum across previous classes)',
+    total_non_psychotropic_medication_load = 'Count of number of all non psychotropic medications',
     per_protocol = 'Per-protocol patients (1=PP/0=ITT conditioned on inclusion of "Yes-Full Foundation" argument): Those with foundation_ember_recommended = "Yes - Full Foundation, date(last_foundational_infusion) - date(first_infusion_completed)) <=14 days, and number_foundational_infusions_including_today <= 4'
   )
   

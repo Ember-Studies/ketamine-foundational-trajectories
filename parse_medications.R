@@ -81,6 +81,9 @@ parse_medications <- function(merged_phq_patient_data){
   # initialize medications dataframe
   df_medication_use <- data.frame(client_id = merged_phq_patient_data$client_id)
   
+  # copy meds dataframe to set matches to null for subsequent identification of non-psychotropic meds
+  meds_copy <- meds
+  
   for(r in 1:length(unique(mapping_df$reference_row))){
     
     print(r)
@@ -131,6 +134,12 @@ parse_medications <- function(merged_phq_patient_data){
     medication_indicator[medication_subject_indices] <- 1
     
     table(medication_indicator)
+    
+    # set matches to "" in meds_copy to null identified matches
+    for(n in 1:ncol(meds_copy)){
+      idx_null <- grep(variants_regex, meds_copy[, n])
+      meds_copy[idx_null, n] <- ""
+    }
   
     # assign indicator to named variable in dataframe  
     df_medication_use[[paste0('medication_use_', medication_name, '_', medication_class)]] <- medication_indicator
@@ -153,7 +162,11 @@ parse_medications <- function(merged_phq_patient_data){
   df_medication_use$mood_stabilizer_load <- rowSums(df_medication_use[, grep('_mood_stabilizer$', names(df_medication_use), value = T)])
   df_medication_use$non_benzodiazepine_anxiolytic_sedative_load <- rowSums(df_medication_use[, grep('_non_benzodiazepine_anxiolytic_sedative$', names(df_medication_use), value = T)])
   df_medication_use$stimulant_load <- rowSums(df_medication_use[, grep('_stimulant$', names(df_medication_use), value = T)])
+  df_medication_use$other_psychotropic_medication_load <- rowSums(df_medication_use[, grep('_other_psychotropic_medication$', names(df_medication_use), value = T)])
   df_medication_use$total_medication_load <- rowSums(df_medication_use[, grep('medication_use_', names(df_medication_use), value = T)])
+  
+  # add non-psychotropic medication load
+  df_medication_use$total_non_psychotropic_medication_load <- rowSums(meds_copy != "")
   
   # merge medication info
   df_medication_use <- df_medication_use %>%

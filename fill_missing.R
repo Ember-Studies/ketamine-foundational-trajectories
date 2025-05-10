@@ -9,6 +9,14 @@ fill_missing <- function(ember_data, variable, path_data){
   
   require(stringr)
   
+  # set sex variables != Male | Female to "" so they are replaced 
+  if(variable=="sex_assigned_at_birth"){
+    
+    print("setting levels to missing")
+    ember_data$sex_assigned_at_birth[ember_data$sex_assigned_at_birth != "Male" & ember_data$sex_assigned_at_birth != "Female"] <- ""
+    
+  }
+  
   # get client_ids with missing variables
   missing <- c(ember_data[which(is.na(ember_data[[variable]])), 'client_id'], 
                ember_data[which(ember_data[[variable]]==""), 'client_id'])

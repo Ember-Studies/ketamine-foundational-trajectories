@@ -38,7 +38,7 @@ add_transform_variables <- function(merged_phq_patient_data, max_prior_infusion_
   ## Per-protocol indicator
   per_protocol_index <- which(((merged_phq_patient_data$last_foundational_infusion - 
                                   merged_phq_patient_data$first_infusion_completed) <= 14 ) & 
-                                ( merged_phq_patient_data$number_foundational_infusions_including_today <= 4 ) &
+                                ( merged_phq_patient_data$number_foundational_infusions_including_today == 4 ) &
                                 (merged_phq_patient_data$foundation_ember_recommended == 'Yes - Full Foundation'))
   
   merged_phq_patient_data$per_protocol <- ifelse(1:nrow(merged_phq_patient_data) %in% per_protocol_index, 1, 0)
