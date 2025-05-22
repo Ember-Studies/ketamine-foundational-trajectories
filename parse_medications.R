@@ -1,10 +1,10 @@
 
-parse_medications <- function(merged_phq_patient_data){
-
+parse_medications <- function(merged_phq_patient_data, osa_distance_threshold){
+  
   require(tidystringdist)
   
   # read medication classifications: note using edited sheet to drop dual matches (Desyrel and Symbyax)
-  medication_classifications <- read_xlsx(paste0(path_data, 'Medication_List_Clasifications.xlsx'), sheet = 'V3 Med Table Edited')
+  medication_classifications <- read_xlsx(paste0(path_data, 'Medication_List_Clasifications_V2.xlsx'), sheet = 'v3 Med Table for Manuscripts')
   
   # clean names 
   medication_classifications <- medication_classifications %>%
@@ -12,17 +12,10 @@ parse_medications <- function(merged_phq_patient_data){
     as.data.frame()
   
   # get name and trade names
-  med_cols <- grep('genetic_name|trade_name', names(medication_classifications), value = T)
-  
-  # collapse as string for regular expression and remove NAs
-  medication_regular_expressions <- sapply(1:nrow(medication_classifications), function(r){
-    string <- paste0(medication_classifications[r, med_cols], collapse = '|')  
-    string <- gsub('\\|NA', '', string)
-    return(string)
-  })
+  med_cols <- 'drug_name'
   
   groupings_df <- data.frame(
-    medication_regular_expressions=medication_regular_expressions,
+    medication_regular_expressions=medication_classifications$drug_name,
     medication_grouping=medication_classifications$final_classification
   )
   
@@ -38,42 +31,23 @@ parse_medications <- function(merged_phq_patient_data){
   # remove missing/NAs
   meds_unique <- meds_unique[!meds_unique %in% c("", NA)]
   
-  # separate reference names
-  medication_names_unlisted <- unlist(strsplit(medication_list, '\\|'))
-  
   # make mapping data frame to link individual names to class and row number for groupings_df
-  mapping_df <- data.frame()
-  
-  u <- 1
-  for(m in 1:length(medication_list)){
-    
-    split_string <- strsplit(medication_list[m], '\\|')
-    split_string <- unlist(split_string)
-    
-    for(s in 1:length(split_string)){
-      
-      mapping_df[u, 'name'] <- split_string[s]
-      mapping_df[u, 'class'] <- groupings_df$medication_grouping[m]
-      mapping_df[u, 'reference_row'] <- m
-      
-      u <- u+1
-      
-    }
-    
-  }
+  mapping_df <- data.frame(name=groupings_df$medication_regular_expressions,
+                           class=groupings_df$medication_grouping,
+                           reference_row = seq(1:nrow(groupings_df)))
   
   # calculate string distances
-  combinations <- tidy_comb_all(c(medication_names_unlisted, meds_unique))
+  combinations <- tidy_comb_all(c(medication_list, meds_unique))
   distances <- tidy_stringdist(combinations, method = "osa")
   
   final_distances <- distances %>%
-    filter((V1 %in% medication_names_unlisted & V2 %in% meds_unique) | (V1 %in% meds_unique & V2 %in% medication_names_unlisted)) %>%
+    filter((V1 %in% medication_list & V2 %in% meds_unique) | (V1 %in% meds_unique & V2 %in% medication_list)) %>%
     dplyr::select(V1, V2, osa) %>%
     dplyr::rename(ref = V1, expr = V2, distance = osa) %>%
     as.data.frame()
   
   # filter distances
-  distances_filtered <- final_distances[final_distances$distance<2, ]
+  distances_filtered <- final_distances[final_distances$distance <= osa_distance_threshold, ]
   
   # display matches
   print(paste0(distances_filtered$ref, ' : ', distances_filtered$expr))
@@ -83,6 +57,9 @@ parse_medications <- function(merged_phq_patient_data){
   
   # copy meds dataframe to set matches to null for subsequent identification of non-psychotropic meds
   meds_copy <- meds
+  
+  # initialize list of string distances used
+  med_str_dist_list <- list()
   
   for(r in 1:length(unique(mapping_df$reference_row))){
     
@@ -121,6 +98,26 @@ parse_medications <- function(merged_phq_patient_data){
     # collect correct and misspelled variants
     medication_string_variants <- unique(unlist(c(distances_filtered[index, c('ref', 'expr')])))
     
+    # initialize dataframe for distance measures for given string
+    med_str_dist <- data.frame(string = rep(NA, length(medication_string_variants)),
+                               distance = rep(NA, length(medication_string_variants)))
+    
+    for(m in 1:length(medication_string_variants)){
+      
+      # find distance from distance_filtered object
+      #osa_dist <- distances_filtered[grep(medication_string_variants[m], distances_filtered[, c('ref', 'expr')])[1], 'distance']
+      
+      match_index <- which(distances_filtered == medication_string_variants[m], arr.ind = TRUE)
+      match_index <- match_index[1, 1] # assumes best match is first
+      osa_dist <- distances_filtered[match_index, 'distance']
+      
+      # record string and distance
+      med_str_dist$string[m] <- medication_string_variants[m]
+      med_str_dist$distance[m] <- osa_dist
+    }
+    
+    med_str_dist_list[[r]] <- med_str_dist
+    
     # create regular expression
     variants_regex <- paste0(paste0(medication_string_variants, collapse = '$|'), '$')
     
@@ -135,21 +132,88 @@ parse_medications <- function(merged_phq_patient_data){
     
     table(medication_indicator)
     
+    
+    # create variable to store distance of matched string
+    medication_string_distance <- rep(NA, nrow(merged_phq_patient_data))
+    
+    for(r in 1:nrow(med_str_dist)){
+      current_string <- paste0(med_str_dist$string[r], '$')
+      medication_subject_indices_distance_match <- lapply(1:ncol(meds), function(k){
+        grep(current_string, meds[, k])
+      })
+      medication_subject_indices_distance_match <- unique(unlist(medication_subject_indices_distance_match))
+      
+      # store distance of current string
+      medication_string_distance[medication_subject_indices_distance_match] <- med_str_dist$distance[r]
+    }
+    
+    #table(medication_string_distance)
+    #table(medication_indicator)
+    
+    ## sanity check: indices from medication_string_distance should all be in indices for medication indicator
+    unique_distances <- unique(medication_string_distance)[!is.na(unique(medication_string_distance))]
+    msd_indices <- lapply(unique_distances, function(d){
+      which(medication_string_distance==d)
+    })
+    msd_indices <- unique(unlist(msd_indices))
+    
+    diff_length <- length(setdiff(msd_indices, which(medication_indicator==1)))
+    
+    # stop and report error
+    if(diff_length>0){
+      print("mismatch between distance record match and medication indicator. Stopping...")
+      print(sprintf("Error at mapping_df row index %s, medication %s", r, variants_regex))
+      stop
+    }
+    
     # set matches to "" in meds_copy to null identified matches
     for(n in 1:ncol(meds_copy)){
       idx_null <- grep(variants_regex, meds_copy[, n])
       meds_copy[idx_null, n] <- ""
     }
-  
+    
     # assign indicator to named variable in dataframe  
     df_medication_use[[paste0('medication_use_', medication_name, '_', medication_class)]] <- medication_indicator
-  
+    
+    # assign distance of medication match to named variable in dataframe
+    df_medication_use[[paste0('medication_string_match_distance_', medication_name)]] <- medication_string_distance
+    
     # clear variables
     rm(list=c('medication_regex', 'medication_name', 'medication_class',
               'index', 'medication_string_variants', 'variants_regex', 
               'medication_subject_indices', 'medication_indicator'))
     
   }
+  
+  # format and bind med_str_dist_list
+  #med_str_dist_list_saved <- med_str_dist_list
+  
+  for(r in 1:nrow(mapping_df)){
+    
+    if(is.null(med_str_dist_list[[r]])){
+      med_str_dist_list[[r]] <- data.frame(
+        string = mapping_df$name[r],
+        reference_string = mapping_df$name[r],
+        distance = 0,
+        class = mapping_df$class[r],
+        match_found = FALSE
+      )
+      
+    }else{
+      
+      med_str_dist_list[[r]]$reference_string <- mapping_df$name[r]
+      med_str_dist_list[[r]]$class <- mapping_df$class[r]
+      med_str_dist_list[[r]]$match_found <- TRUE
+      
+      # reorder columns
+      med_str_dist_list[[r]] <- med_str_dist_list[[r]][, c('string', 'reference_string', 'distance', 'class', 'match_found')]
+      
+    }
+    
+  }
+  
+  med_str_dist_list <- do.call(rbind, med_str_dist_list)
+  write.csv(x = med_str_dist_list, file = paste0(path_out, 'medication_match_summary.csv'), quote = FALSE, row.names = FALSE)
   
   # clean names
   df_medication_use <- df_medication_use %>%
@@ -163,7 +227,7 @@ parse_medications <- function(merged_phq_patient_data){
   df_medication_use$non_benzodiazepine_anxiolytic_sedative_load <- rowSums(df_medication_use[, grep('_non_benzodiazepine_anxiolytic_sedative$', names(df_medication_use), value = T)])
   df_medication_use$stimulant_load <- rowSums(df_medication_use[, grep('_stimulant$', names(df_medication_use), value = T)])
   df_medication_use$other_psychotropic_medication_load <- rowSums(df_medication_use[, grep('_other_psychotropic_medication$', names(df_medication_use), value = T)])
-  df_medication_use$total_medication_load <- rowSums(df_medication_use[, grep('medication_use_', names(df_medication_use), value = T)])
+  df_medication_use$total_psychotropic_medication_load <- rowSums(df_medication_use[, grep('medication_use_', names(df_medication_use), value = T)])
   
   # add non-psychotropic medication load
   df_medication_use$total_non_psychotropic_medication_load <- rowSums(meds_copy != "")
@@ -175,7 +239,7 @@ parse_medications <- function(merged_phq_patient_data){
   merged_phq_patient_data <- cbind(merged_phq_patient_data, df_medication_use)
   
   return(merged_phq_patient_data)
-
+  
 }
 
 

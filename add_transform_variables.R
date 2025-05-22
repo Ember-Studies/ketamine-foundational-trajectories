@@ -4,7 +4,7 @@
 # - ketamine dose: TBD
 # - medication indicator variables: TBD
 
-add_transform_variables <- function(merged_phq_patient_data, max_prior_infusion_threshold, path_data, path_code, plot_hist = FALSE){
+add_transform_variables <- function(merged_phq_patient_data, max_prior_infusion_threshold, path_data, path_code, osa_distance_threshold, plot_hist = FALSE){
   
   ## Parse comorbidities
   source(paste0(path_code, 'diagnoses_comorbidities_from_icd_and_self_report.R'))
@@ -33,7 +33,8 @@ add_transform_variables <- function(merged_phq_patient_data, max_prior_infusion_
   
   ## Medication indicator variables: TBD
   source(paste0(path_code, 'parse_medications.R'))
-  merged_phq_patient_data <- parse_medications(merged_phq_patient_data = merged_phq_patient_data)
+  merged_phq_patient_data <- parse_medications(merged_phq_patient_data = merged_phq_patient_data,
+                                               osa_distance_threshold)
   
   ## Per-protocol indicator
   per_protocol_index <- which(((merged_phq_patient_data$last_foundational_infusion - 

@@ -13,17 +13,12 @@ require(readxl)
 require(writexl)
 
 # set paths
-# path_code <- '/path/to/code/' # path to formatting scripts
-# path_data <- '/path/to/data/' # path to csv files
-# path_out <- '/path/for/output/' # path to save output
-
-path_code <- '~/Google Drive/My Drive/MGH/Studies/Ember/code/shared/ember/code/' # path to formatting scripts
-path_data <- '~/Google Drive/My Drive/MGH/Studies/Ember/data/EHR/Raw_March_13_2025/' # path to csv files
-path_out <- '~/Google Drive/My Drive/MGH/Studies/Ember/Project_1_Symptom_Changes/data/' # path to save output
+path_code <- '/path/to/code/' # path to formatting scripts
+path_data <- '/path/to/data/' # path to csv files
+path_out <- '/path/for/output/' # path to save output
 
 # set airtable access token
-#token <- readLines('/path/to/token.txt') # read txt file that contains token
-token <- readLines('~/Google Drive/My Drive/MGH/Studies/Ember/code/Tejas_Code/token.txt') # read txt file that contains token
+token <- readLines('/path/to/token.txt') # read txt file that contains token
 set_airtable_api_key(token, install = FALSE)
 
 # source functions
@@ -57,6 +52,7 @@ merged_phq_patient_data <- format_merge_phq_data(merged_patient_airtable_intake_
 # Add and format variables
 ember_data <- add_transform_variables(merged_phq_patient_data = merged_phq_patient_data, 
                                       max_prior_infusion_threshold = 4,
+                                      osa_distance_threshold = 2,
                                       path_data = path_data, 
                                       path_code = path_code)
 
@@ -68,9 +64,9 @@ ember_data <- fill_missing(ember_data = ember_data,
 # Clean variables
 ember_data <- cleanup(ember_data = ember_data)
 
-# Write data dictionary
-data_dictionary(ember_data = ember_data, 
-                path_out = path_out)
+# # Write data dictionary
+# data_dictionary(ember_data = ember_data, 
+#                 path_out = path_out)
 
 # Save
 save(ember_data, file = sprintf('%s/ember_data_formatted_%s.Rdata', path_out, gsub(" ", "_", date())))
