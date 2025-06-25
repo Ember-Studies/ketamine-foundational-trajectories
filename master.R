@@ -50,11 +50,13 @@ merged_phq_patient_data <- format_merge_phq_data(merged_patient_airtable_intake_
                                                  time_post = 30)
 
 # Add and format variables
-ember_data <- add_transform_variables(merged_phq_patient_data = merged_phq_patient_data, 
-                                      max_prior_infusion_threshold = 4,
-                                      osa_distance_threshold = 2,
+ember_data <- add_transform_variables(merged_phq_patient_data = merged_phq_patient_data,
+                                      max_prior_infusion_threshold = 9999,
                                       path_data = path_data, 
-                                      path_code = path_code)
+                                      path_code = path_code,
+                                      path_out = path_out,
+                                      osa_distance_threshold = 2,
+                                      save_meds_table = TRUE)
 
 # Find replacements for missing variables
 ember_data <- fill_missing(ember_data = ember_data, 
