@@ -1,0 +1,132 @@
+---
+title: "Ember Medication Parsing Report"
+format: html
+editor: visual
+---
+
+```{r}
+require(ggplot2)
+require(tidyverse)
+require(dplyr)
+require(knitr)
+```
+
+## Load and format medication table
+
+```{r}
+#| include: false
+load('~/Google Drive/My Drive/MGH/Studies/Ember/Project_1_Symptom_Changes/data/medication_metadata.Rdata')
+
+data <- matched_results %>%
+  as.data.frame()
+
+# unpack categories
+category_1 <- sapply(data$categories, function(x){ 
+  return(x[[1]])
+})
+
+category_2 <- sapply(data$categories, function(x){ 
+  len <- length(x)
+  if(len==1){
+    return("No second category")
+  }else{
+    return(x[[2]])
+  }
+})
+
+data <- data %>%
+  dplyr::select(-categories) %>%
+  mutate(category_1 = category_1) %>%
+  mutate(category_2 = category_2)
+
+data$degree_matched <- unlist(data$degree_matched)
+```
+
+## Plot match distances
+
+```{r}
+ggplot(data, aes(x=degree_matched)) + 
+  geom_bar() + 
+  ggtitle('OSA distances overall') + 
+  theme_bw()
+```
+
+## Distances by category 1
+
+```{r}
+ggplot(data, aes(x=degree_matched)) + 
+  geom_bar() + 
+  facet_wrap(~category_1, scale = 'free') +
+  ggtitle('OSA distances by category 1') + 
+  theme_bw()
+```
+
+## Distances by category 2
+
+```{r}
+ggplot(data, aes(x=degree_matched)) + 
+  geom_bar() + 
+  facet_wrap(~category_2, scale = 'free') +
+  ggtitle('OSA distances by category 2') + 
+  theme_bw()
+```
+
+## Frequency of patient-submitted drug strings by category
+
+```{r}
+tab <- table(data$medication_raw, data$category_1)
+nonzero_idx <- which(tab != 0, arr.ind = TRUE)
+result_tab <- data.frame(
+  medication_string = rownames(tab)[nonzero_idx[,1]],
+  class = colnames(tab)[nonzero_idx[,2]],
+  frequency = tab[nonzero_idx]
+)
+```
+
+### Antidepressants
+
+```{r}
+kable(result_tab[result_tab$class=='Antidepressant',])
+```
+
+### Antipsychotics
+
+```{r}
+kable(result_tab[result_tab$class=='Antipsychotic',])
+```
+
+### Benzodiazepines
+
+```{r}
+kable(result_tab[result_tab$class=='Benzodiazepine',])
+```
+
+### NBAS
+
+```{r}
+kable(result_tab[result_tab$class=='NBAS',])
+```
+
+### Mood Stabilizer
+
+```{r}
+kable(result_tab[result_tab$class=='Mood Stabilizer',])
+```
+
+### Stimulant
+
+```{r}
+kable(result_tab[result_tab$class=='Stimulant',])
+```
+
+### Other psychotropic medication
+
+```{r}
+kable(result_tab[result_tab$class=='Other Psychotropic medication',])
+```
+
+### Non-Psychotropic
+
+```{r}
+kable(result_tab[result_tab$class=='Non-Psychotropic',])
+```

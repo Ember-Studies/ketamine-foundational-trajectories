@@ -2,8 +2,8 @@ merge_patient_airtable_intake_data <- function(airtable_data_filtered, intake_da
 
   # format dates with lubridate
   airtable_data_filtered <- airtable_data_filtered %>%
-    mutate(first_infusion_completed=ymd(first_infusion_completed),
-           last_foundational_infusion=mdy(last_foundational_infusion)) %>%
+    mutate(first_infusion_completed=lubridate::ymd(first_infusion_completed),
+           last_foundational_infusion=lubridate::ymd(last_foundational_infusion)) %>%
     rename('client_id'='intake_q_id')
   
   intake_data_filtered <- intake_data_filtered %>%

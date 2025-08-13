@@ -20,17 +20,6 @@ add_transform_variables <- function(merged_phq_patient_data, max_prior_infusion_
   merged_phq_patient_data$age_bin[which(merged_phq_patient_data$age_category_senior == 1)] <- 'senior'
   merged_phq_patient_data$age_bin <- as.factor(merged_phq_patient_data$age_bin)
   
-  ## Dose
-  # get dose data
-  source(paste0(path_code, 'format_dose.R'))
-  dose_data <- format_dose(path_data = path_data, plot_hist = plot_hist)
-  
-  # add dose data to main data frame
-  source(paste0(path_code, 'add_dose.R'))
-  merged_phq_patient_data <- add_dose(merged_phq_patient_data = merged_phq_patient_data, 
-                                      dose_data = dose_data, 
-                                      max_prior_infusion_threshold = max_prior_infusion_threshold)
-  
   ## Medication indicator variables: TBD
   source(paste0(path_code, 'parse_medications.R'))
   merged_phq_patient_data <- parse_medications(merged_phq_patient_data = merged_phq_patient_data,

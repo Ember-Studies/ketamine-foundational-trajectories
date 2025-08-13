@@ -27,7 +27,7 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   phq$date_of_birth_tx <- lubridate::mdy(phq$date_of_birth)
   
   # transform date submitted
-  phq$date_submited_tx <- lubridate::ymd(phq$date_submited)
+  phq$date_submited_tx <- lubridate::ymd(phq$date_submited) # Deprecated use of "date_submited" field -- only use to fill missing from "first_opened"
   
   # transform first opened date
   phq$first_opened_tx <- as.Date(lubridate::mdy_hms(phq$first_opened))
@@ -79,7 +79,7 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
     group_by(client_id) %>%
     mutate(time_point=row_number()) %>% 
     mutate(time_interval = date_submitted_transformed - date_submitted_transformed[1]) %>%
-    mutate(time_since_previous = date_submitted_transformed - lag(date_submitted_transformed, n = 1, default = first (date_submitted_transformed))) %>%
+    mutate(time_since_previous = date_submitted_transformed - lag(date_submitted_transformed, n = 1, default = first (date_submitted_transformed))) %>% # this may need to be checked after windowing
     mutate(age_years = lubridate::interval(date_of_birth_transformed, date_submitted_transformed) / years(x=1)) %>%
     as.data.frame()
   
@@ -113,7 +113,11 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   
   # drop/remove all records where absolute time > 30 days for time_last_foundational_infusion_to_phq
   merged_phq_patient_data <- merged_phq_patient_data[!merged_phq_patient_data$time_last_foundational_infusion_to_phq > time_post,]
-  #hist(as.numeric(merged_phq_patient_data$time_last_foundational_infusion_to_phq))
+  
+  if (plot_hist) {
+    hist(as.numeric(merged_phq_patient_data$time_last_foundational_infusion_to_phq),
+         main = 'time_last_foundational_infusion_to_phq', xlab = 'days')
+  }
   
   ## Identify T1 (baseline) PHQ as worst PHQ prior to or on day of first infusion
   tmp <- split(merged_phq_patient_data, merged_phq_patient_data$client_id)
