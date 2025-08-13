@@ -9,15 +9,17 @@ require(survival)
 require(datadictionary)
 require(tidystringdist)
 require(rairtable)
+require(readxl)
 require(writexl)
+require(stringdist)
 
 # set paths
-path_code <- '/path/to/code/' # path to formatting scripts
-path_data <- '/path/to/data/' # path to csv files
-path_out <- '/path/for/output/' # path to save output
+path_code <- '~/Google Drive/My Drive/MGH/Studies/Ember/code/shared/ember/code/' # path to formatting scripts
+path_data <- '~/Google Drive/My Drive/MGH/Studies/Ember/data/EHR/Raw_March_13_2025/' # path to csv files
+path_out <- '~/Google Drive/My Drive/MGH/Studies/Ember/Project_1_Symptom_Changes/data/' # path to save output
 
 # set airtable access token
-token <- readLines('/path/to/token.txt') # read txt file that contains token
+token <- readLines('~/Google Drive/My Drive/MGH/Studies/Ember/code/Tejas_Code/token.txt') # read txt file that contains token
 set_airtable_api_key(token, install = FALSE)
 
 # source functions
@@ -31,7 +33,9 @@ source(paste0(path_code, 'cleanup.R'))
 source(paste0(path_code, 'data_dictionary.R'))
 
 # Format base patient table
-airtable_data_filtered <- format_patient_airtable(path_data = path_data, date_ceiling_ymd = "2025-01-01")
+airtable_data_filtered <- format_patient_airtable(path_data = path_data, 
+                                                  date_ceiling_ymd = "2025-01-01",
+                                                  filter_full_foundation=TRUE)
 
 # Format intake table
 intake_data_filtered <- format_intake_tables(path_data = path_data)
@@ -46,10 +50,14 @@ merged_phq_patient_data <- format_merge_phq_data(merged_patient_airtable_intake_
                                                  time_pre = -30, 
                                                  time_post = 30)
 
-# Add and format variables
-ember_data <- add_transform_variables(merged_phq_patient_data = merged_phq_patient_data, 
+# Add and format variables: note some warnings here, double check
+ember_data <- add_transform_variables(merged_phq_patient_data = merged_phq_patient_data,
+                                      max_prior_infusion_threshold = 4,
                                       path_data = path_data, 
-                                      path_code = path_code)
+                                      path_code = path_code,
+                                      path_out = path_out,
+                                      osa_distance_threshold = 2,
+                                      save_meds_table = TRUE)
 
 # Find replacements for missing variables
 ember_data <- fill_missing(ember_data = ember_data, 
@@ -59,9 +67,9 @@ ember_data <- fill_missing(ember_data = ember_data,
 # Clean variables
 ember_data <- cleanup(ember_data = ember_data)
 
-# Write data dictionary
-data_dictionary(ember_data = ember_data, 
-                path_out = path_out)
+# # Write data dictionary
+# data_dictionary(ember_data = ember_data, 
+#                 path_out = path_out)
 
 # Save
 save(ember_data, file = sprintf('%s/ember_data_formatted_%s.Rdata', path_out, gsub(" ", "_", date())))

@@ -2,6 +2,11 @@
 
 cleanup <- function(ember_data){
   
+  # Drop "Not Depressed" categories from foundation outcome variable
+  ember_data <- ember_data %>% 
+    dplyr::filter(foundation_outcome != "Not Depression - Tx Failure") %>%
+    dplyr::filter(foundation_outcome != "Not Depression - Tx Success")
+  
   # drop unwanted variables
   ember_data <- ember_data %>%
     dplyr::select(-contains('_medication_name')) %>%

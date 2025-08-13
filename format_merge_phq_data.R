@@ -27,7 +27,7 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   phq$date_of_birth_tx <- lubridate::mdy(phq$date_of_birth)
   
   # transform date submitted
-  phq$date_submited_tx <- lubridate::ymd(phq$date_submited)
+  phq$date_submited_tx <- lubridate::ymd(phq$date_submited) # Deprecated use of "date_submited" field -- only use to fill missing from "first_opened"
   
   # transform first opened date
   phq$first_opened_tx <- as.Date(lubridate::mdy_hms(phq$first_opened))
@@ -38,19 +38,19 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   phq$phq9_date[index_phq9_date_missing] <- phq$date_submited_tx[index_phq9_date_missing]
   
   # read in all clients csv for corrected dobs
-  data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
+  data_all_clients <- readxl::read_xlsx(paste0(path_data, 'MGH - List - All Clients.xlsx'), sheet = '2025Data')
   
   # clean names
   data_all_clients <- data_all_clients %>%
     janitor::clean_names()
   
   # transform all clients dob
-  data_all_clients$date_of_birt_tx <- rep(NA, nrow(data_all_clients))
+  data_all_clients$date_of_birth_tx <- rep(NA, nrow(data_all_clients))
   for(r in 1:nrow(data_all_clients)){
-    data_all_clients$date_of_birt_tx[r] <- format(as.Date(data_all_clients$date_of_birth[r], '%Y-%m-%d'), "%m/%d/%Y")
+    data_all_clients$date_of_birth_tx[r] <- format(as.Date(x=data_all_clients$date_of_birth[r], format='%Y-%m-%d'), "%m/%d/%Y")
   }
   
-  data_all_clients$date_of_birt_tx <- lubridate::mdy(data_all_clients$date_of_birt_tx)
+  data_all_clients$date_of_birth_tx <- lubridate::mdy(data_all_clients$date_of_birth_tx)
   
   # replace phq dob with all clients dob
   for(s in 1:nrow(data_all_clients)){
@@ -59,7 +59,7 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
     sid <- data_all_clients$client_id[s]
     
     # set dob replacement from all clients sheet
-    dob_replace <- data_all_clients$date_of_birt_tx[which(data_all_clients$client_id==sid)]
+    dob_replace <- data_all_clients$date_of_birth_tx[which(data_all_clients$client_id==sid)]
     
     # leave as is if dob not recorded in all clients
     if(is.na(dob_replace)){
@@ -79,7 +79,7 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
     group_by(client_id) %>%
     mutate(time_point=row_number()) %>% 
     mutate(time_interval = date_submitted_transformed - date_submitted_transformed[1]) %>%
-    mutate(time_since_previous = date_submitted_transformed - lag(date_submitted_transformed, n = 1, default = first (date_submitted_transformed))) %>%
+    mutate(time_since_previous = date_submitted_transformed - lag(date_submitted_transformed, n = 1, default = first (date_submitted_transformed))) %>% # this may need to be checked after windowing
     mutate(age_years = lubridate::interval(date_of_birth_transformed, date_submitted_transformed) / years(x=1)) %>%
     as.data.frame()
   
@@ -113,7 +113,11 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   
   # drop/remove all records where absolute time > 30 days for time_last_foundational_infusion_to_phq
   merged_phq_patient_data <- merged_phq_patient_data[!merged_phq_patient_data$time_last_foundational_infusion_to_phq > time_post,]
-  #hist(as.numeric(merged_phq_patient_data$time_last_foundational_infusion_to_phq))
+  
+  if (plot_hist) {
+    hist(as.numeric(merged_phq_patient_data$time_last_foundational_infusion_to_phq),
+         main = 'time_last_foundational_infusion_to_phq', xlab = 'days')
+  }
   
   ## Identify T1 (baseline) PHQ as worst PHQ prior to or on day of first infusion
   tmp <- split(merged_phq_patient_data, merged_phq_patient_data$client_id)

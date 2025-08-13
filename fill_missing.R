@@ -9,6 +9,14 @@ fill_missing <- function(ember_data, variable, path_data){
   
   require(stringr)
   
+  # set sex variables != Male | Female to "" so they are replaced 
+  if(variable=="sex_assigned_at_birth"){
+    
+    print("setting levels to missing")
+    ember_data$sex_assigned_at_birth[ember_data$sex_assigned_at_birth != "Male" & ember_data$sex_assigned_at_birth != "Female"] <- ""
+    
+  }
+  
   # get client_ids with missing variables
   missing <- c(ember_data[which(is.na(ember_data[[variable]])), 'client_id'], 
                ember_data[which(ember_data[[variable]]==""), 'client_id'])
@@ -92,10 +100,10 @@ fill_missing <- function(ember_data, variable, path_data){
   }
   
   # all clients form
-  data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
+  #data_all_clients <- read.csv(paste0(path_data, 'MGH - List - All Clients - 2025Data.csv'))
+  data_all_clients <- readxl::read_xlsx(paste0(path_data, 'MGH - List - All Clients.xlsx'), sheet = '2025Data')
   data_all_clients <- data_all_clients %>%
-    clean_names() %>%
-    rename('sex_assigned_at_birth'='sex')
+    clean_names()
   
   df_mapping <- search_missings(data = data_all_clients, df_mapping = df_mapping, variable = variable)
   
