@@ -27,10 +27,12 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
   phq$date_of_birth_tx <- lubridate::mdy(phq$date_of_birth)
   
   # transform date submitted
-  phq$date_submited_tx <- lubridate::ymd(phq$date_submited) # Deprecated use of "date_submited" field -- only use to fill missing from "first_opened"
+  #phq$date_submited_tx <- lubridate::ymd(phq$date_submited) # Deprecated use of "date_submited" field -- only use to fill missing from "first_opened"
+  phq$date_submited_tx <- lubridate::mdy(phq$date_submited)
   
   # transform first opened date
-  phq$first_opened_tx <- as.Date(lubridate::mdy_hms(phq$first_opened))
+  #phq$first_opened_tx <- as.Date(lubridate::mdy_hms(phq$first_opened))
+  phq$first_opened_tx <- lubridate::mdy(phq$first_opened)
   
   # make phq_9_date variable from first opened and secondarily date submitted
   phq$phq9_date <- phq$first_opened_tx
@@ -45,12 +47,18 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
     janitor::clean_names()
   
   # transform all clients dob
-  data_all_clients$date_of_birth_tx <- rep(NA, nrow(data_all_clients))
-  for(r in 1:nrow(data_all_clients)){
-    data_all_clients$date_of_birth_tx[r] <- format(as.Date(x=data_all_clients$date_of_birth[r], format='%Y-%m-%d'), "%m/%d/%Y")
-  }
+  #data_all_clients$date_of_birth_tx <- format(janitor::excel_numeric_to_date(as.numeric(data_all_clients$date_of_birth)), "%m/%d/%Y")
   
+  data_all_clients$date_of_birth_tx <-format(as.Date(x=data_all_clients$date_of_birth, format='%Y-%m-%d'), "%m/%d/%Y")
   data_all_clients$date_of_birth_tx <- lubridate::mdy(data_all_clients$date_of_birth_tx)
+  
+  # data_all_clients$date_of_birth_tx <- rep(NA, nrow(data_all_clients))
+  # for(r in 1:nrow(data_all_clients)){
+  #   #data_all_clients$date_of_birth_tx[r] <- format(as.Date(x=data_all_clients$date_of_birth[r], format='%Y-%m-%d'), "%m/%d/%Y")
+  #   data_all_clients$date_of_birth_tx[r] <- janitor::excel_numeric_to_date(as.numeric(data_all_clients$date_of_birth[r]))
+  # }
+  # 
+  # data_all_clients$date_of_birth_tx <- lubridate::mdy(data_all_clients$date_of_birth_tx)
   
   # replace phq dob with all clients dob
   for(s in 1:nrow(data_all_clients)){
@@ -91,8 +99,8 @@ format_merge_phq_data <- function(merged_patient_airtable_intake_data, path_data
     rename('date_submitted_phq'='date_submitted_transformed')
   
   # rename variables in merged dataframe and drop date of birth
-  merged_patient_airtable_intake_data <- merged_patient_airtable_intake_data %>%
-    rename('date_submitted_intake'='date_submitted')
+  # merged_patient_airtable_intake_data <- merged_patient_airtable_intake_data %>%
+  #   rename('date_submitted_intake'='date_submitted')
   
   # merge with left join
   merged_phq_patient_data <- phq_formatted %>%

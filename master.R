@@ -15,7 +15,8 @@ require(stringdist)
 
 # set paths
 path_code <- '~/Google Drive/My Drive/MGH/Studies/Ember/code/shared/ember/code/' # path to formatting scripts
-path_data <- '~/Google Drive/My Drive/MGH/Studies/Ember/data/EHR/Raw_March_13_2025/' # path to csv files
+#path_data <- '~/Google Drive/My Drive/MGH/Studies/Ember/data/EHR/Raw_March_13_2025/' # path to csv files
+path_data <- '~/Google Drive/My Drive/MGH/Studies/Ember/data/EHR/Raw_August_29_2025/' # path to csv files
 path_out <- '~/Google Drive/My Drive/MGH/Studies/Ember/Project_1_Symptom_Changes/data/' # path to save output
 
 # set airtable access token
@@ -34,7 +35,7 @@ source(paste0(path_code, 'data_dictionary.R'))
 
 # Format base patient table
 airtable_data_filtered <- format_patient_airtable(path_data = path_data, 
-                                                  date_ceiling_ymd = "2025-01-01",
+                                                  date_ceiling_ymd = "2025-08-29",
                                                   filter_full_foundation=TRUE)
 
 # Format intake table

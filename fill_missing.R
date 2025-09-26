@@ -55,7 +55,7 @@ fill_missing <- function(ember_data, variable, path_data){
   
   print(sprintf("Found %s missing values", nrow(df_mapping[df_mapping$value!="", ])))
   
-  # define function to searach EHR forms for replacements
+  # define function to search EHR forms for replacements
   search_missings <- function(data, df_mapping, variable){
     
     # update missing unique
@@ -115,11 +115,11 @@ fill_missing <- function(ember_data, variable, path_data){
   df_mapping <- search_missings(data = data_all_intake, df_mapping = df_mapping, variable = variable)
   
   # intake package data form
-  data_intake_package <- read.csv(paste0(path_data, 'MGH - Form - Intake Package - 2025update.csv'))
-  data_intake_package <- data_intake_package %>%
-    clean_names()
-  
-  df_mapping <- search_missings(data = data_intake_package, df_mapping = df_mapping, variable = variable)
+  # data_intake_package <- read.csv(paste0(path_data, 'MGH - Form - Intake Package - 2025update.csv'))
+  # data_intake_package <- data_intake_package %>%
+  #   clean_names()
+  # 
+  # df_mapping <- search_missings(data = data_intake_package, df_mapping = df_mapping, variable = variable)
   
   # all appointments form
   data_all_appointments <- read.csv(paste0(path_data, 'MGH - List - All Appointments - 2025Data.csv'))
@@ -129,11 +129,11 @@ fill_missing <- function(ember_data, variable, path_data){
   df_mapping <- search_missings(data = data_all_appointments, df_mapping = df_mapping, variable = variable)
   
   # brief intake form
-  data_brief_intake <- read.csv(paste0(path_data, 'MGH - Form - Brief Medical Intake Form - 2025Data.csv'))
-  data_brief_intake <- data_brief_intake %>%
-    clean_names()
-  
-  df_mapping <- search_missings(data = data_brief_intake, df_mapping = df_mapping, variable = variable)
+  # data_brief_intake <- read.csv(paste0(path_data, 'MGH - Form - Brief Medical Intake Form - 2025Data.csv'))
+  # data_brief_intake <- data_brief_intake %>%
+  #   clean_names()
+  # 
+  # df_mapping <- search_missings(data = data_brief_intake, df_mapping = df_mapping, variable = variable)
   
   ## Merge with original data
   df_mapping_ss <- df_mapping[df_mapping$value!="", ]

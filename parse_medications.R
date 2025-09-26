@@ -95,6 +95,7 @@ parse_medications <- function(merged_phq_patient_data, osa_distance_threshold = 
         str_detect(category, regex("other psychotropic medication", ignore_case = TRUE)) ~ "Other Psychotropic medication",
         str_detect(category, regex("stimulant", ignore_case = TRUE)) ~ "Stimulant",
         TRUE ~ "Non-Psychotropic"
+        # Try adding a null category here; if NA 
       )
     )
   
@@ -152,6 +153,10 @@ parse_medications <- function(merged_phq_patient_data, osa_distance_threshold = 
   med_long$medication_raw <- gsub("Clonipin", "Klonopin", med_long$medication_raw)
   med_long$medication_raw <- gsub("clonipin", "Klonopin", med_long$medication_raw)
   
+  # 5. change empty spaces to no spaces: " " -> ""
+  med_long$medication_raw <- gsub("^ ", "", med_long$medication_raw)
+  med_long$medication_raw <- gsub(" $", "", med_long$medication_raw)
+  
   # Run matching for each medication string
   matched_results <- med_long %>%
     rowwise() %>%
@@ -181,10 +186,11 @@ parse_medications <- function(merged_phq_patient_data, osa_distance_threshold = 
   
   for (i in seq_len(nrow(matched_results))) {
     cats <- matched_results$categories[[i]]
+    drug_str <- matched_results$drugs_matched[[i]] # new: This may not be an NA value at this point; print out and check
     # Ensure it's a character vector, and normalize category names
     cats <- as.character(cats)
     cats <- unique(gsub("[^a-zA-Z]", "_", tolower(cats)))
-    if (length(cats) > 0 && any(!is.na(cats))) {
+    if (length(cats) > 0 && any(!is.na(cats)) && !is.na(drug_str)) { # new
       for (c in cats) {
         if (c %in% category_cols) {
           matched_results[i, c] <- 1L  # Only count 1 per category per medication string
@@ -192,6 +198,9 @@ parse_medications <- function(merged_phq_patient_data, osa_distance_threshold = 
       }
     }
   }
+  
+  # drop empty character values
+  matched_results <- matched_results[!matched_results$medication_raw=="", ] # new
   
   # Determine psychotropic status per drug row: 1 if ANY matched category is NOT Non-Psychotropic
   matched_results <- matched_results %>%
